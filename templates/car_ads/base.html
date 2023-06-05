@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <title>Used Car Ads</title>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
+        {# MEDIUM STYLE EDITOR#}
+        <script src="//cdn.jsdelivr.net/medium-editor/latest/js/medium-editor.min.js"></script>
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/medium-editor/latest/css/medium-editor.min.css" type="text/css" media="screen" charset="utf-8">
+
+    
+
+        {# Custom CSS#}
+        {% comment %} <link rel="stylesheet" href="{% static 'form_scraper/css/master.css' %}"> {% endcomment %}
+
+        {# Fonts#}
+        <link href="https://fonts.googleapis.com/css?family=Montserrat|Russo+One" rel="stylesheet">
+      
+        <style>
+        table, th, td {
+          border: 1px solid black;
+          padding: 15px;
+        }
+        body {
+          padding-bottom: 50px; /* set padding-bottom to 50 pixels */
+        }
+        </style>
+    </head>        
+<body class='loader'>
+
+
+  <nav class="navbar navbar-default techfont custom-navbar navbar-inverse">
+    <div class="container">
+      <div class="container">
+
+      <ul class="nav navbar-nav">
+        <li><a class='navbar-brand bigbrand' href="#">Used Cars Database</a></li>
+
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+          <li><a class='nav navbar-right' href="#" ><span class="glyphicon glyphicon-user"></span></a></li>
+      </ul>
+  </div>
+</div>
+</nav>
+
+  {# The actual blog posts#}
+        <div class="content container">
+
+
+                    {% block content %}
+                    {% endblock %}
+
+        </div>
+
+{# SCRIPTS#}
+
+
+
+</body>
+</html>
