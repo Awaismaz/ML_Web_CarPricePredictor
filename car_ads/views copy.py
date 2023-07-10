@@ -20,33 +20,25 @@ class ads(TemplateView):
         context['qty'] = ad.objects.all().count()
         brands = ad.objects.order_by('brand').values_list('brand', flat=True).distinct()
         context['brands']=brands
-        models = ad.objects.order_by('model').values_list('model', flat=True).distinct() # Added for 'model'
-        context['models']=models # Added for 'model'
         fuels = ad.objects.order_by('fuel').values_list('fuel', flat=True).distinct()
         context['fuels']=fuels
         x=self.request.GET.get('trained')
         if x=='1':
             context['trained']=1
-        
         y=self.request.GET.get('prediction')
-        
         if y is not None:
-            context['prediction'] = y
-            reference_price_float = float(y)
-            selected_brand = self.request.GET.get('brand') 
-            selected_model = self.request.GET.get('model') 
-
-            cars_queryset = ad.objects.exclude(price__exact='nan').filter(brand=selected_brand, model=selected_model).annotate(
+            context['prediction']=y
+            reference_price_float=float(y)
+            cars_queryset = ad.objects.exclude(price__exact='nan').annotate(
                 price_diff=Cast(F('price'), FloatField()) - reference_price_float,
             )
 
             # Sort the queryset by the absolute difference in ascending order and retrieve the top 10 closest matches
             closest_matches = cars_queryset.order_by('price_diff')[:10]
-
-            context['matches'] = closest_matches
-
+            
+            context['matches']=closest_matches
+        
         return context
-
 
 def brand_unique(x):
     if x=='ALFA' or x=='ALFA-ROMEO':
@@ -220,10 +212,8 @@ def train(request):
     from sklearn import preprocessing
     le1 = preprocessing.LabelEncoder()
     le2 = preprocessing.LabelEncoder()
-    le3 = preprocessing.LabelEncoder() # added for 'model'
     df['brand'] = le1.fit_transform(df['brand'])
     df['Fuel'] = le2.fit_transform(df['Fuel'])
-    df['model'] = le3.fit_transform(df['model']) # added for 'model'
     
     def First_hand(x):
         if x=='Yes':
@@ -240,7 +230,7 @@ def train(request):
             return 0
         
     df['Gearbox']=df['Gearbox'].apply(lambda x: Gearbox(x))
-    df=df.drop(columns=['Ad Link'])
+    df=df.drop(columns=['Ad Link', 'model'])
     df['Price']=df['Price'].astype(float)
     df['Gearbox']=df['Gearbox'].astype(float)
     df['Year']=df['Year'].astype(float)
@@ -249,7 +239,6 @@ def train(request):
     df['First Hand']=df['First Hand'].astype(float)
     df['brand']=df['brand'].astype(float)
     df['Fuel']=df['Fuel'].astype(float)
-    df['model']=df['model'].astype(float)
 
 
     from sklearn.model_selection import train_test_split
@@ -266,18 +255,17 @@ def train(request):
     joblib.dump(lm, 'model.pkl')
     joblib.dump(le1, 'brand_encoder.pkl')
     joblib.dump(le2, 'fuel_encoder.pkl')
-    joblib.dump(le3, 'model_encoder.pkl') 
 
     redirect_url = reverse('car_ads:ads') + "?trained=1"
 
     return redirect (redirect_url)
 
 def predict(request):
+
     if request.method == 'POST':
         model = joblib.load('model.pkl')
         brand_encoder = joblib.load('brand_encoder.pkl')
         fuel_encoder = joblib.load('fuel_encoder.pkl')
-        model_encoder = joblib.load('model_encoder.pkl')
 
         fuel = request.POST.get('fuel')
         gearbox = request.POST.get('gearbox')
@@ -286,11 +274,7 @@ def predict(request):
         mileage = request.POST.get('mileage')
         first_hand = request.POST.get('first_hand')
         brand = request.POST.get('brand')
-        car_model = request.POST.get('model')
-
-        selected_brand=brand
-        selected_model=car_model
-
+        
         if first_hand=='Yes':
             first_hand=1
         else:
@@ -303,33 +287,14 @@ def predict(request):
 
         brand = brand_encoder.transform([brand])[0]
         fuel = fuel_encoder.transform([fuel])[0]
-        car_model = model_encoder.transform([car_model])[0]
-
-        data_dict = {'Fuel': [fuel], 'Gearbox': [gearbox], 'Year': [year], 
-                     'Fiscal Power': [fiscal_power], 'Mileage': [mileage], 
-                     'First Hand': [first_hand], 'brand': [brand], 'model': [car_model]}
-
-        X = pd.DataFrame(data_dict)
+        my_list = [fuel, gearbox, year, fiscal_power, mileage, first_hand, brand]
+        float_list = [float(x) for x in my_list]
+        X = [float_list]
 
         # Make predictions using the loaded model
-        prediction = model.predict(X) + 15000
+        prediction = model.predict(X) - 15000
 
     prediction=str(int(np.round(prediction)[0]))
-    reference_price_float=float(prediction)
+    redirect_url = reverse('car_ads:ads') + "?prediction=" + prediction
 
-    cars_queryset = ad.objects.exclude(price__exact='nan').filter(brand=selected_brand, model=selected_model).annotate(
-        price_diff=Cast(F('price'), FloatField()) - reference_price_float,
-    )
-    closest_matches = cars_queryset.order_by('price_diff')[:10]
-
-    # Transform closest_matches to a list of dictionaries to be able to return as JSON
-    matches_list = list(closest_matches.values())
-
-    return JsonResponse({'prediction': prediction, 'matches': matches_list})
-
-from django.http import JsonResponse
-
-def get_models(request):
-    brand = request.GET.get('brand', None)
-    models = list(ad.objects.filter(brand=brand).order_by('model').values_list('model', flat=True).distinct())
-    return JsonResponse({'models': models})
+    return redirect (redirect_url)

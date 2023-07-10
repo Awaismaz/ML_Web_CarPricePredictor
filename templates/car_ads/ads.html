@@ -2,190 +2,297 @@
 
 {% block content %}
 {% load static %}
-{% comment %} <div class="container"> {% endcomment %}
-    {% comment %} <div class="container"> {% endcomment %}
-    <h1>Used Cars Ads: {{ qty }}</h1>
+
+<main class="container mt-4">
+
+  <!-- Place for all ads table -->
+  <section id="ads-table" class="my-5">
+      <h2 class="text-center text-primary mb-3">All Ads Table</h2>
+      <div class="card">
+        <div class="card-body">
+          <form method="POST" action="{% url 'car_ads:update' %}" class="post-form">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type="submit" class="btn btn-danger update-button mx-auto d-block">Update</button>
+
+            </form>
+        </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+          <div class="table-responsive" style="height: 400px;"> <!-- You can adjust the height as needed -->
+            {% if ads %}   
+            <table class="table table-striped table-hover">
+                  <thead>
+                      <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Brand</th>
+                          <th scope="col">Model</th>
+                          <th scope="col">Mileage</th>
+                          <th scope="col">Year</th>
+                          <th scope="col">Gearbox</th>
+                          <th scope="col">Fuel</th>
+                          <th scope="col">Price</th>
+                          <th scope="col">Fiscal Power</th>
+                          <th scope="col">First Hand</th>
+                          <th scope="col">Platform</th>
+                          <th scope="col">Link</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for ad in ads %}
+                      <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>{{ ad.brand }}</td>
+                          <td>{{ ad.model }}</td>
+                          <td>{{ ad.mileage }}</td>
+                          <td>{{ ad.year }}</td>
+                          <td>{{ ad.gearbox }}</td>
+                          <td>{{ ad.fuel }}</td>
+                          <td>{{ ad.price }}</td>
+                          <td>{{ ad.fiscal_power }}</td>
+                          <td>{{ ad.fh }}</td>
+                          <td>{{ ad.platform }}</td>
+                          <td><a href="{{ ad.ad_link }}">{{ ad.ad_link }}</a></td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+              {% endif %}   
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Place for train predictor -->
+  <section id="train-predictor" class="my-5">
+      <h2 class="text-center text-primary mb-3">Train Estimator</h2>
+      <div class="card">
+          <div class="card-body">
+            <div class="text-center">
+            <form method="POST" action="{% url 'car_ads:train' %}" class="post-form">
+              {% csrf_token %}
+              {{form.as_p}}
+              <button type="submit" class="btn btn-danger update-button mx-auto d-block">Train Estimator</button>
+            </form>
+            <p></p>
+            {% if trained %}
+              <p>Training Completed</p>
+            {% endif %}
+          </div>
+          </div>
+      </div>
+  </section>
+
+  <!-- Place for price predictor -->
+  <section id="price-predictor" class="my-5">
+      <h2 class="text-center text-primary mb-3">Price Estimator</h2>
+      <div class="card">
+          <div class="card-body">
+            <div class="row mt-5">
+              <div class="col">
+                <p>Here you can enter the details of a car and get an estimated price.</p>
+                <div id="prediction">
+                  {% if prediction %}
+                  <h2 id="predictionText">Predicted Price of Vehicle is {{ prediction }} DH</h2>
+                  {% else %}
+                  <h2 id="predictionText"></h2>
+                  {% endif %}
+              </div>
+                <form id="predictForm" method="post" action="{% url 'car_ads:predict' %}" class="post-form">
+                  {% csrf_token %}
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="fuel">Fuel:</label>
+                      <select class="form-select" id="fuel" name="fuel">
+                        {% for fuel in fuels %}
+                        <option value="{{ fuel }}">{{ fuel }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col">
+                      <label for="gearbox">Gearbox:</label>
+                      <select class="form-select" id="gearbox" name="gearbox">
+                        <option value="Manual">Manual</option>
+                        <option value="Automatic">Automatic</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="year">Year:</label>
+                      <input type="number" class="form-control" id="year" name="year" value="2010">
+                    </div>
+                    <div class="col">
+                      <label for="fiscal_power">Fiscal Power:</label>
+                      <input type="number" class="form-control" id="fiscal_power" name="fiscal_power" value="5.0">
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="mileage">Mileage:</label>
+                      <input type="number" class="form-control" id="mileage" name="mileage" value="150000">
+                    </div>
+                    <div class="col">
+                      <label for="first_hand">First Hand:</label>
+                      <select class="form-select" id="first_hand" name="first_hand">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="brand">Brand:</label>
+                        <select class="form-select" id="brand" name="brand">
+                          {% for brand in brands %}
+                            <option value="{{ brand }}">{{ brand }}</option>
+                          {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                      <label for="model">Model:</label>
+                        <select class="form-select" id="model" name="model">
+                          {% for model in models %}
+                            <option value="{{ model }}">{{ model }}</option>
+                          {% endfor %}
+                        </select>
+                    </div>
+                    
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-lg">Estimate Price</button>
+                </form>
+              </div>
+            
+            </div>
+          </div>
+      </div>
+  </section>
+
+  <!-- Place for recommended ads table -->
+  <section id="recommended-ads" class="my-5">
+      <h2 class="text-center text-primary mb-3">Recommended Ads</h2>
+      <div class="card">
+          <div class="card-body">
+            <p></p>
+            <div class="table-responsive" style="height: 400px;"> <!-- You can adjust the height as needed -->
+              <table class="table table-striped table-hover">
+                <thead>
+                  <th scope="col">Index</th>
+                  <th scope="col">Brand</th>
+                  <th scope="col">Model</th>
+                  <th scope="col">Mileage</th>
+                  <th scope="col">Year</th>
+                  <th scope="col">Gearbox</th>
+                  <th scope="col">Fuel</th>
+                  <th scope="col">Price Difference</th>
+                  <th scope="col">Fiscal Power</th>
+                  <th scope="col">First Hand</th>
+                  <th scope="col">Platform</th>
+                  <th scope="col">Link</th>
+         
+                </thead>
+                <tbody id="matchesTableBody">
+                  {% for ad in matches %}  
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ ad.brand }}</td>
+                    <td>{{ ad.model }}</td>
+                    <td>{{ ad.mileage }}</td>
+                    <td>{{ ad.year }}</td>
+                    <td>{{ ad.gearbox }}</td>
+                    <td>{{ ad.fuel }}</td>
+                    <td>{{ ad.price }}</td>
+                    <td>{{ ad.fiscal_power }}</td>
+                    <td>{{ ad.fh }}</td>
+                    <td>{{ ad.platform }}</td>
+                    <td><a href="{{ ad.ad_link }}">{{ ad.ad_link }}</a></td>
+  
+                  </tr>
+                  {% endfor %}
+                </tbody>
+                
+                  
+              </table>
+          </div>
+          </div>
+      </div>
+  </section>
+</main>
+
+<p></p>
+<p></p>
     
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        
+        $("#brand").change(model);
+        $('#predictForm').on('submit', function(event) {
+          event.preventDefault();
+  
+          $.ajax({
+              url: "{% url 'car_ads:predict' %}",
+              type: 'POST',
+              data: $(this).serialize(),
+              dataType: 'json',
+              success: function(response) {
+                  $('#predictionText').text("Predicted Price of Vehicle is " + response.prediction + " DH");
+                  
+                  console.log("S")
+                  var matchesTableBody = $('#matchesTableBody');
 
-    <form method="POST" action="{% url 'car_ads:update' %}" class="post-form">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit" class="btn btn-danger btn-lg">Update</button>
-    </form>
-    <p></p>
+                  matchesTableBody.empty();
 
+                
+                  var matches = response.matches;
 
-    {% if ads %} 
+                  for(var i = 0; i < matches.length; i++) {
+                      var match = matches[i];
+  
+                      var row = "<tr>"
+                          + "<td>" + (i + 1) + "</td>"
+                          + "<td>" + match.brand + "</td>"
+                          + "<td>" + match.model + "</td>"
+                          + "<td>" + match.mileage + "</td>"
+                          + "<td>" + match.year + "</td>"
+                          + "<td>" + match.gearbox + "</td>"
+                          + "<td>" + match.fuel + "</td>"
+                          + "<td>" + match.price_diff + "</td>"
+                          + "<td>" + match.fiscal_power + "</td>"
+                          + "<td>" + match.fh + "</td>"
+                          + "<td>" + match.platform + "</td>"
+                          + "<td><a href="+ match.ad_link +">"+match.ad_link+"</a></td>"
+                          + "</tr>";
+                      matchesTableBody.append(row);
+                  }
+              
+                },
+              error: function(response) {
+                  alert('Error! Please try again.');
+              }
+          });
+      });
+        
+    });
+    function model(){
+      var selectedBrand = $(this).val();
 
-    <div class="table-responsive" style="height: 400px;">
-      <table class="table table-striped">
-        <thead>
-          <th><h2>Index</h2></th>
-          <th><h2>Brand</h2></th>
-          <th><h2>Model</h2></th>
-          <th><h2>Mileage</h2></th>
-          <th><h2>Year</h2></th>
-          <th><h2>Gearbox</h2></th>
-          <th><h2>Fuel</h2></th>
-          <th><h2>Price</h2></th>
-          <th><h2>Fiscal Power</h2></th>
-          <th><h2>First Hand</h2></th>
-          <th><h2>Platform</h2></th>
-          <th><h2>Link</h2></th>
-
-        </thead>
-        {% for ad in ads %}  
-        <tr>
-          <td><h3>{{ forloop.counter }}</h3></td>
-          <td><h3>{{ ad.brand }}</h3></td>
-          <td><h3>{{ ad.model }}</h3></td>
-          <td><h3>{{ ad.mileage }}</h3></td>
-          <td><h3>{{ ad.year }}</h3></td>
-          <td><h3>{{ ad.gearbox }}</h3></td>
-          <td><h3>{{ ad.fuel }}</h3></td>
-          <td><h3>{{ ad.price }}</h3></td>
-          <td><h3>{{ ad.fiscal_power }}</h3></td>
-          <td><h3>{{ ad.fh }}</h3></td>
-          <td><h3>{{ ad.platform }}</h3></td>
-          <td><a href="{{ ad.ad_link }}"><h3>{{ ad.ad_link }}</a></h3></td>
-        </tr>
-        {% endfor %}
-          
-      </table>
-</div>
-{% endif %}
-
-<p></p>
-<form method="POST" action="{% url 'car_ads:train' %}" class="post-form">
-  {% csrf_token %}
-  {{form.as_p}}
-  <button type="submit" class="btn btn-danger btn-lg">Train Predictor</button>
-</form>
-<p></p>
-{% if trained %}
-  <p>Training Completed</p>
-{% endif %}
-<p></p>
-<div class="row mt-5">
-  <div class="col">
-    <h2>Price Predictor</h2>
-    <p>Here you can enter the details of a car and get an estimated price.</p>
-    {% if prediction %}
-    <h2>Predicted Price of Vehicle is {{ prediction }} DH</h2>
-    {% endif %}
-    <form method="post" action="{% url 'car_ads:predict' %}" class="post-form">
-      {% csrf_token %}
-      <div class="row mb-3">
-        <div class="col">
-          <label for="fuel">Fuel:</label>
-          <select class="form-select" id="fuel" name="fuel">
-            {% for fuel in fuels %}
-            <option value="{{ fuel }}">{{ fuel }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col">
-          <label for="gearbox">Gearbox:</label>
-          <select class="form-select" id="gearbox" name="gearbox">
-            <option value="Manual">Manual</option>
-            <option value="Automatic">Automatic</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col">
-          <label for="year">Year:</label>
-          <input type="number" class="form-control" id="year" name="year" value="2010">
-        </div>
-        <div class="col">
-          <label for="fiscal_power">Fiscal Power:</label>
-          <input type="number" class="form-control" id="fiscal_power" name="fiscal_power" value="5.0">
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col">
-          <label for="mileage">Mileage:</label>
-          <input type="number" class="form-control" id="mileage" name="mileage" value="150000">
-        </div>
-        <div class="col">
-          <label for="first_hand">First Hand:</label>
-          <select class="form-select" id="first_hand" name="first_hand">
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col">
-          <label for="brand">Brand:</label>
-            <select class="form-select" id="brand" name="brand">
-              {% for brand in brands %}
-                <option value="{{ brand }}">{{ brand }}</option>
-              {% endfor %}
-            </select>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-lg">Predict Price</button>
-    </form>
-  </div>
-
-</div>
-
-{% if matches %} 
-    <p></p>
-    <h1>Here are some Recommendations:</h1>
-    <p></p>
-    <div class="table-responsive" style="height: 400px;">
-      <table class="table table-striped">
-        <thead>
-          <th><h2>Index</h2></th>
-          <th><h2>Brand</h2></th>
-          <th><h2>Model</h2></th>
-          <th><h2>Mileage</h2></th>
-          <th><h2>Year</h2></th>
-          <th><h2>Gearbox</h2></th>
-          <th><h2>Fuel</h2></th>
-          <th><h2>Price Difference</h2></th>
-          <th><h2>Fiscal Power</h2></th>
-          <th><h2>First Hand</h2></th>
-          <th><h2>Platform</h2></th>
-          <th><h2>Link</h2></th>
-
-        </thead>
-        {% for ad in matches %}  
-        <tr>
-          <td><h3>{{ forloop.counter }}</h3></td>
-          <td><h3>{{ ad.brand }}</h3></td>
-          <td><h3>{{ ad.model }}</h3></td>
-          <td><h3>{{ ad.mileage }}</h3></td>
-          <td><h3>{{ ad.year }}</h3></td>
-          <td><h3>{{ ad.gearbox }}</h3></td>
-          <td><h3>{{ ad.fuel }}</h3></td>
-          <td><h3>{{ ad.price }}</h3></td>
-          <td><h3>{{ ad.fiscal_power }}</h3></td>
-          <td><h3>{{ ad.fh }}</h3></td>
-          <td><h3>{{ ad.platform }}</h3></td>
-          <td><a href="{{ ad.ad_link }}"><h3>{{ ad.ad_link }}</a></h3></td>
-        </tr>
-        {% endfor %}
-          
-      </table>
-  </div>
-{% endif %}
-
-<p></p>
-<p></p>
-    
-{% comment %} </div> {% endcomment %}
-{% comment %} </div> {% endcomment %}
-    <script>var editor = new MediumEditor('.editable');</script>
-
-    <script
-    src="https://code.jquery.com/jquery-3.1.1.min.js"
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-    crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'form_scraper/js/script.min.js' %}"></script>
-    <script src="{% static 'form_scraper/js/form_scraper.js' %}"></script>
-
+      $.ajax({
+          url: "{% url 'car_ads:get_models' %}",
+          data: {
+            'brand': selectedBrand
+          },
+          success: function(data) {
+              var modelSelect = $('#model');
+              modelSelect.html('');
+              $.each(data.models, function(key, value) {
+                  modelSelect.append('<option value="' + value + '">' + value + '</option>');
+              });
+          }
+      });
+    }
+    </script>
 {% endblock %}
